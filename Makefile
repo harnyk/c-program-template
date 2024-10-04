@@ -1,4 +1,4 @@
-# List of source files
+# List of source files, separated by space
 SOURCES = main.c
 
 # Compiler
@@ -18,10 +18,12 @@ RELEASE_FLAGS = -O2
 BUILD_DIR = build
 DEBUG_DIR = $(BUILD_DIR)/debug
 RELEASE_DIR = $(BUILD_DIR)/release
-OBJ_DIR = $(BUILD_DIR)/obj
+DEBUG_OBJ_DIR = $(DEBUG_DIR)/obj
+RELEASE_OBJ_DIR = $(RELEASE_DIR)/obj
 
-# Transformation of source files into object files (in the directory $(OBJ_DIR))
-OBJECTS = $(addprefix $(OBJ_DIR)/,$(SOURCES:.c=.o))
+# Transformation of source files into object files for each mode
+DEBUG_OBJECTS = $(addprefix $(DEBUG_OBJ_DIR)/,$(SOURCES:.c=.o))
+RELEASE_OBJECTS = $(addprefix $(RELEASE_OBJ_DIR)/,$(SOURCES:.c=.o))
 
 # Default target
 all: debug
@@ -35,19 +37,23 @@ release: CFLAGS += $(RELEASE_FLAGS)
 release: $(RELEASE_DIR)/main
 
 # A rule for the debug version of the executable
-$(DEBUG_DIR)/main: $(OBJECTS) | $(DEBUG_DIR)
-	$(CC) $(CFLAGS) -o $@ $(OBJECTS)
+$(DEBUG_DIR)/main: $(DEBUG_OBJECTS) | $(DEBUG_DIR)
+	$(CC) $(CFLAGS) -o $@ $(DEBUG_OBJECTS)
 
 # A rule for the release version of the executable
-$(RELEASE_DIR)/main: $(OBJECTS) | $(RELEASE_DIR)
-	$(CC) $(CFLAGS) -o $@ $(OBJECTS)
+$(RELEASE_DIR)/main: $(RELEASE_OBJECTS) | $(RELEASE_DIR)
+	$(CC) $(CFLAGS) -o $@ $(RELEASE_OBJECTS)
 
-# A rule for compiling each .c file into .o (object files are placed in $(OBJ_DIR))
-$(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
+# A rule for compiling each .c file into .o for debug
+$(DEBUG_OBJ_DIR)/%.o: %.c | $(DEBUG_OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# A rule for compiling each .c file into .o for release
+$(RELEASE_OBJ_DIR)/%.o: %.c | $(RELEASE_OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Create directories if they don't exist
-$(OBJ_DIR) $(DEBUG_DIR) $(RELEASE_DIR):
+$(DEBUG_OBJ_DIR) $(RELEASE_OBJ_DIR) $(DEBUG_DIR) $(RELEASE_DIR):
 	mkdir -p $@
 
 # Clean the build directory
