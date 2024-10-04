@@ -1,5 +1,5 @@
-# List of source files, separated by space
-SOURCES = main.c
+# Automatically gather all .c files from the current directory and subdirectories
+SOURCES = $(shell find . -name '*.c')
 
 # Compiler
 CC = gcc
@@ -13,7 +13,6 @@ DEBUG_FLAGS = -ggdb3 -O0
 # Release flags (optimization level)
 RELEASE_FLAGS = -O2
 
-
 # Directories for binaries and object files
 BUILD_DIR = build
 DEBUG_DIR = $(BUILD_DIR)/debug
@@ -22,8 +21,8 @@ DEBUG_OBJ_DIR = $(DEBUG_DIR)/obj
 RELEASE_OBJ_DIR = $(RELEASE_DIR)/obj
 
 # Transformation of source files into object files for each mode
-DEBUG_OBJECTS = $(addprefix $(DEBUG_OBJ_DIR)/,$(SOURCES:.c=.o))
-RELEASE_OBJECTS = $(addprefix $(RELEASE_OBJ_DIR)/,$(SOURCES:.c=.o))
+DEBUG_OBJECTS = $(SOURCES:%.c=$(DEBUG_OBJ_DIR)/%.o)
+RELEASE_OBJECTS = $(SOURCES:%.c=$(RELEASE_OBJ_DIR)/%.o)
 
 # Default target
 all: debug
@@ -46,10 +45,12 @@ $(RELEASE_DIR)/main: $(RELEASE_OBJECTS) | $(RELEASE_DIR)
 
 # A rule for compiling each .c file into .o for debug
 $(DEBUG_OBJ_DIR)/%.o: %.c | $(DEBUG_OBJ_DIR)
+	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # A rule for compiling each .c file into .o for release
 $(RELEASE_OBJ_DIR)/%.o: %.c | $(RELEASE_OBJ_DIR)
+	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Create directories if they don't exist
